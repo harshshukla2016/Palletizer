@@ -38,6 +38,7 @@ import {
 } from "@chakra-ui/react";
 
 function ManualPalletConfigurator({ onSubmit }) {
+  const reachabilityModalDisclosure = useDisclosure();
   const [useTwoPallets, setUseTwoPallets] = useState(false);
   const [currentPallet, setCurrentPallet] = useState("left");
   const [currentLayer, setCurrentLayer] = useState("odd");
@@ -92,6 +93,11 @@ function ManualPalletConfigurator({ onSubmit }) {
     isOpen: isTeachRobotModalOpen,
     onOpen: onTeachRobotModalOpen,
     onClose: onTeachRobotModalClose,
+  } = useDisclosure();
+  const {
+    isOpen: isReachabilityModalOpen,
+    onOpen: onReachabilityModalOpen,
+    onClose: onReachabilityModalClose,
   } = useDisclosure();
   const [configName, setConfigName] = useState("");
   const [units, setUnits] = useState("m");
@@ -882,6 +888,14 @@ function ManualPalletConfigurator({ onSubmit }) {
                 >
                   Teach Robot
                 </Button>
+                <Button
+                  colorScheme="purple"
+                  onClick={reachabilityModalDisclosure.onOpen}
+                  flex="1"
+                  minW="130px"
+                >
+  Reachability
+</Button>
               </Flex>
             </Stack>
             <Box
@@ -1026,6 +1040,40 @@ function ManualPalletConfigurator({ onSubmit }) {
             </ModalFooter>
           </ModalContent>
         </Modal>
+        <Modal 
+        isOpen={reachabilityModalDisclosure.isOpen} 
+        onClose={reachabilityModalDisclosure.onClose}
+      >
+        <ModalOverlay />
+        <ModalContent bg="gray.100">
+          <ModalHeader>Check Reachability</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text mb={4}>
+              Check if all points in the current configuration are reachable by the robot.
+            </Text>
+            <Button
+              colorScheme="blue"
+              onClick={() => {
+                toast({
+                  title: "Checking reachability",
+                  description: "Analyzing if all points are reachable...",
+                  status: "info",
+                  duration: 3000,
+                  isClosable: true,
+                });
+              }}
+            >
+              Start Check
+            </Button>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" onClick={reachabilityModalDisclosure.onClose}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       </Box>
     </DndProvider>
   );

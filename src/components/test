@@ -1,0 +1,217 @@
+import React, { useState, useEffect, useRef } from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import BoxGrid from "./BoxGrid";
+import SavedConfigurations from "./SavedConfigurations";
+import "./draganddrop.css";
+import { ChevronLeftIcon } from "@chakra-ui/icons";
+import html2canvas from "html2canvas";
+import axios from "axios";
+import {
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  FormLabel,
+  Heading,
+  Input,
+  Stack,
+  Text,
+  Switch,
+  useColorModeValue,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  Select,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
+  useToast,
+  Drawer,
+  DrawerBody,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+} from "@chakra-ui/react";
+
+function ManualPalletConfigurator({ onSubmit }) {
+  const [useTwoPallets, setUseTwoPallets] = useState(false);
+  const [currentPallet, setCurrentPallet] = useState("left");
+  const [currentLayer, setCurrentLayer] = useState("odd");
+  const [pallets, setPallets] = useState({
+    left: {
+      odd: { boxes: [], nextId: 0 },
+      even: { boxes: [], nextId: 0 },
+      gridWidth: "5",
+      gridHeight: "5",
+      boxWidth: "1",
+      boxLength: "1",
+      boxHeight: "1",
+      numLayers: 1,
+      scaleFactorWidth: 100,
+      scaleFactorLength: 100,
+      displayWidth: 500,
+      displayHeight: 500,
+    },
+    right: {
+      odd: { boxes: [], nextId: 0 },
+      even: { boxes: [], nextId: 0 },
+      gridWidth: "5",
+      gridHeight: "5",
+      boxWidth: "1",
+      boxLength: "1",
+      boxHeight: "1",
+      numLayers: 1,
+      scaleFactorWidth: 100,
+      scaleFactorLength: 100,
+      displayWidth: 500,
+      displayHeight: 500,
+    },
+  });
+  const [masterPoints, setMasterPoints] = useState({ left: null, right: null });
+  const [savedConfigurations, setSavedConfigurations] = useState([]);
+  const gridRef = useRef(null);
+  const toast = useToast();
+
+  // Disclosures for modals
+  const {
+    isOpen: isModalOpen,
+    onOpen: onModalOpen,
+    onClose: onModalClose,
+  } = useDisclosure();
+  
+  const {
+    isOpen: isTeachRobotModalOpen,
+    onOpen: onTeachRobotModalOpen,
+    onClose: onTeachRobotModalClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: isReachabilityModalOpen,
+    onOpen: onReachabilityModalOpen,
+    onClose: onReachabilityModalClose,
+  } = useDisclosure();
+
+  const currentConfig = pallets[currentPallet];
+
+  // Function declarations
+  const addBox = () => {
+    const newBox = {
+      id: currentConfig[currentLayer].nextId,
+      x: 10,
+      y: 10,
+      width: Number(currentConfig.boxWidth),
+      length: Number(currentConfig.boxLength),
+      height: Number(currentConfig.boxHeight),
+      rotate: 0,
+    };
+    setPallets((prev) => ({
+      ...prev,
+      [currentPallet]: {
+        ...currentConfig,
+        [currentLayer]: {
+          ...currentConfig[currentLayer],
+          boxes: [...currentConfig[currentLayer].boxes, newBox],
+          nextId: currentConfig[currentLayer].nextId + 1,
+        },
+      },
+    }));
+  };
+
+  const submitBoxes = () => {
+    // Implementation of submitBoxes function
+    // This should match your existing implementation
+    console.log("Submitting boxes...");
+  };
+
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <Box>
+        {/* ... other JSX content ... */}
+        
+        <Flex justify="space-between" mt={4} flexWrap="wrap" gap={2}>
+          <Button
+            colorScheme="blue"
+            onClick={addBox}
+            flex="1"
+            minW="130px"
+          >
+            Add Box
+          </Button>
+          <Button
+            colorScheme="teal"
+            onClick={onModalOpen}
+            flex="1"
+            minW="170px"
+          >
+            Save Configuration
+          </Button>
+          <Button
+            colorScheme="green"
+            onClick={submitBoxes}
+            flex="1"
+            minW="130px"
+          >
+            Submit Boxes
+          </Button>
+          <Button
+            colorScheme="orange"
+            onClick={onTeachRobotModalOpen}
+            flex="1"
+            minW="130px"
+          >
+            Teach Robot
+          </Button>
+          <Button
+            colorScheme="purple"
+            onClick={onReachabilityModalOpen}
+            flex="1"
+            minW="130px"
+          >
+            Reachability
+          </Button>
+        </Flex>
+
+        {/* Modal for reachability */}
+        <Modal isOpen={isReachabilityModalOpen} onClose={onReachabilityModalClose}>
+          <ModalOverlay />
+          <ModalContent bg="gray.100">
+            <ModalHeader>Check Reachability</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Text mb={4}>
+                Check if all points in the current configuration are reachable by the robot.
+              </Text>
+              <Button
+                colorScheme="blue"
+                onClick={() => {
+                  toast({
+                    title: "Checking reachability",
+                    description: "Analyzing if all points are reachable...",
+                    status: "info",
+                    duration: 3000,
+                    isClosable: true,
+                  });
+                }}
+              >
+                Start Check
+              </Button>
+            </ModalBody>
+            <ModalFooter>
+              <Button variant="ghost" onClick={onReachabilityModalClose}>
+                Close
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* ... other modals ... */}
+      </Box>
+    </DndProvider>
+  );
+}
+
+export default ManualPalletConfigurator;
